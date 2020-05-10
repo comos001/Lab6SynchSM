@@ -60,4 +60,28 @@ void TickFct_Blink() {
                 BL_State = Restart;
           }
         break;
-"source/main.c" 120L, 2497C
+ default:
+//        PORTB = 0x01;
+        break;
+   }
+}
+
+
+int main(void) {
+    DDRA = 0x00; PORTA = 0xFF;
+    DDRB = 0xFF; PORTB = 0x00;
+
+   TimerSet(300);
+   TimerOn();
+
+   //BL_State = BL_Start; // Indicates initial call to tick-fct
+   PORTB = 0x00;
+   while (1) {
+     // TickFct_Blink();      // Execute one synchSM tick
+      while (!TimerFlag){}  // Wait for BL's period
+      TimerFlag = 0;        // Lower flag
+       TickFct_Blink();
+ }
+    return 1;
+}
+
