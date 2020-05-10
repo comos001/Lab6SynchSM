@@ -1,0 +1,108 @@
+/*	Author: victoromosor
+ *  Partner(s) Name: 
+ *	Lab Section:
+ *	Assignment: Lab #06  Exercise #02
+ *	Exercise Description: [optional - include for your own benefit]
+ *
+ *	I acknowledge all content contained herein, excluding template or example
+ *	code, is my own original work.
+ */
+#include "timer.h"
+#include <avr/io.h>
+#ifdef _SIMULATE_
+#include "simAVRHeader.h"
+#endif
+
+//VideoLink: https://drive.google.com/file/d/1sZ8UitQzBRPNYYf64J8adfZ385IMaZU2/view?usp=sharing
+
+enum BL_States { BL_Start, Led1, Led2, Led3, Stay, Restart } BL_State;
+
+void TickFct_Blink() {
+
+   switch ( BL_State ) { //Transitions
+      case BL_Start:
+         BL_State = Led1; //Initial state
+         break;
+      case Led1:
+	if ((PINA & 0x01) == 0x00){
+		BL_State = Stay;
+	}	
+        else{  BL_State = Led2; }
+         break;
+      case Led2:
+	  if ((PINA & 0x01) == 0x00){     
+                BL_State = Stay;
+        }
+	else{
+    	     BL_State = Led3;}
+         break;
+      case Led3:
+	 if ((PINA & 0x01) == 0x00){     
+                BL_State = Stay;
+        }
+	else {
+	 BL_State = Led1;}
+	break;
+      case Stay:
+	  if ((PINA & 0x01) == 0x00){
+                 BL_State = Stay;
+          }
+	  else{
+		BL_State = Restart;
+	  }
+	break;
+     case Restart: 
+     	 if ((PINA & 0x01) == 0x00){
+	 	BL_State = BL_Start;
+         }
+	 else {
+	   	BL_State = Restart;
+         } 
+         break;	
+      default:
+         BL_State = Led1;
+         break;
+   }
+
+   switch (BL_State ) { //State actions
+      case BL_Start:
+        //PORTB = 0x01;
+         break;
+      case Led1:
+         PORTB = 0x01;
+         break;
+      case Led2:
+	 PORTB = 0x02;
+	 break;
+      case Led3: 
+	 PORTB = 0x04;
+	 break;
+      case Stay:
+	 break;
+      case Restart:
+	 break;
+      
+      default:
+//        PORTB = 0x01; 
+	break;
+   }
+}
+
+
+int main(void) {
+    DDRA = 0x00; PORTA = 0xFF;
+    DDRB = 0xFF; PORTB = 0x00;
+
+   TimerSet(300);
+   TimerOn(); 
+      
+   //BL_State = BL_Start; // Indicates initial call to tick-fct
+   PORTB = 0x00;
+   while (1) {         
+     // TickFct_Blink();      // Execute one synchSM tick
+      while (!TimerFlag){}  // Wait for BL's period
+      TimerFlag = 0;        // Lower flag
+       TickFct_Blink();
+ }
+    return 1;
+}
