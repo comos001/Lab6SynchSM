@@ -21,8 +21,13 @@ void TickFct_Blink() {
 
    switch ( BL_State ) { //Transitions
       case BL_Start:
-         BL_State = Led1; //Initial state
-         break;
+        if ((PINA & 0x01) == 0x00){
+	 BL_State = Led1; //Initial state
+         }
+	 else {
+	 BL_State = BL_Start;
+	 }
+	 break;
       case Led1:
 	if ((PINA & 0x01) == 0x00){
 		BL_State = Stay;
